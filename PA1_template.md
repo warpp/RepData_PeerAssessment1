@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Data set
 
@@ -21,56 +16,79 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 The code assumes that data is downloaded and unzipped into the working directory.
 
-```{r echo=TRUE}
 
+```r
 #reading the data into data frame
 activity <- read.csv("activity.csv", header=TRUE, stringsAsFactors = FALSE, sep=",")
 
 #changing the column format to date type
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
-
 ```
 
 ## What is mean total number of steps taken per day?
 
 For this part of the assignment, we are ignoring the missing values in the dataset.
 
-```{r echo=TRUE}
-library(dplyr)
 
+```r
+library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 steps_day <- summarise(group_by(activity, date), sum(steps))
 names(steps_day) <- c("date","total.steps")
 with(steps_day, hist(total.steps, main="Total steps per day"))
-
-mn <- mean(steps_day$total.steps, na.rm=T)
-md <- median(steps_day$total.steps, na.rm=T)
-
 ```
 
-Mean of the total number of steps taken per day is `r mn` and the median is `r mn`.
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
+mn <- mean(steps_day$total.steps, na.rm=T)
+md <- median(steps_day$total.steps, na.rm=T)
+```
+
+Mean of the total number of steps taken per day is 1.0766189\times 10^{4} and the median is 1.0766189\times 10^{4}.
 
 
 ## What is the average daily activity pattern?
 
 Average daily activity pattern can be seen on a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
 
-```{r echo=TRUE}
 
+```r
 steps_int <- summarise(group_by(activity, interval), mean(steps, na.rm=T))
 names(steps_int) <- c("interval","mean.steps")
 with(steps_int, plot(interval, mean.steps, type="l"))
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 maxst <- max(steps_int$mean.steps)
 ```
 
-5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps is `r maxst`.
+5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps is 206.1698113.
 
 ## Imputing missing values
 
-The total number of missing values in the original dataset is `r sum(is.na(activity))`. 
+The total number of missing values in the original dataset is 2304. 
 For next part of the assignment, missing values are replaced by mean for that 5-minute interval. 
 
-```{r echo=TRUE}
+
+```r
 activity_full <- activity
 
 # replace na's with mean for that interval
@@ -83,18 +101,24 @@ names(steps_full) <- c("date","total.steps")
 
 Histogram of the total number of steps taken each day after missing values are imputed:
 
-```{r echo=TRUE}
-with(steps_full, hist(total.steps))
 
+```r
+with(steps_full, hist(total.steps))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
 mn2 <- mean(steps_full$total.steps)
 md2 <- median(steps_full$total.steps)
 ```
 
-Mean is `r mn2` and median is `r md2`. 
+Mean is 1.0766189\times 10^{4} and median is 1.0766189\times 10^{4}. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=TRUE}
+
+```r
 #create new factor variable with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend
 df0$weekday<-weekdays(activity$date)
 df0$weekend<-"Weekday"
@@ -105,6 +129,8 @@ df0$weekend<-factor(df0$weekend)
 library(lattice)
 xyplot( mean.steps ~ interval | weekend, data=df0, type="l", layout=c(1,2))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 Activities during weekdays are, as expected, differently distributed than during weekends. Activities during weekends are more evenly distributed, since during weekends people organize their activities during the whole day.
 
